@@ -47,8 +47,11 @@ func main() {
 	// Auto migrate the schema
 	db.AutoMigrate(&HistoricalFigure{}, &UserRanking{}, &AverageRanking{})
 
-	// Seed the database
+	// Seed the database with historical figures
 	SeedDatabase()
+
+	// Initialize average rankings
+	updateAverageRankings(db)
 
 	// Initialize Gin router
 	r := gin.Default()
@@ -105,7 +108,14 @@ func main() {
 		// Get average rankings
 		api.GET("/rankings/average", func(c *gin.Context) {
 			var averages []AverageRanking
-			db.Order("average ASC").Find(&averages)
+			result := db.Order("average ASC").Find(&averages)
+
+			// If no averages found, recalculate them
+			if result.RowsAffected == 0 {
+				updateAverageRankings(db)
+				db.Order("average ASC").Find(&averages)
+			}
+
 			c.JSON(http.StatusOK, averages)
 		})
 	}
@@ -133,34 +143,42 @@ func updateAverageRankings(db *gorm.DB) {
 		GROUP BY ur.figure_id, hf.name
 	`).Scan(&averages)
 
-	// Update or create average rankings
-	for _, avg := range averages {
-		var existing AverageRanking
-		result := db.Where("figure_id = ?", avg.FigureID).First(&existing)
+	// Clear existing average rankings
+	db.Exec("DELETE FROM average_rankings")
 
-		if result.Error == gorm.ErrRecordNotFound {
-			// Create new average ranking
+	// Create new average rankings
+	for _, avg := range averages {
+		newAvg := AverageRanking{
+			FigureID:  avg.FigureID,
+			Name:      avg.Name,
+			Average:   avg.Average,
+			UpdatedAt: time.Now(),
+		}
+		if err := db.Create(&newAvg).Error; err != nil {
+			log.Printf("Error creating average ranking: %v", err)
+		} else {
+			log.Printf("New average ranking created - Figure: %s, Average: %.2f",
+				avg.Name, avg.Average)
+		}
+	}
+
+	// If no rankings exist, create default rankings based on historical figures
+	if len(averages) == 0 {
+		var figures []HistoricalFigure
+		db.Order("rank").Find(&figures)
+
+		for _, figure := range figures {
 			newAvg := AverageRanking{
-				FigureID:  avg.FigureID,
-				Name:      avg.Name,
-				Average:   avg.Average,
+				FigureID:  figure.ID,
+				Name:      figure.Name,
+				Average:   float64(figure.Rank),
 				UpdatedAt: time.Now(),
 			}
 			if err := db.Create(&newAvg).Error; err != nil {
-				log.Printf("Error creating average ranking: %v", err)
+				log.Printf("Error creating default average ranking: %v", err)
 			} else {
-				log.Printf("New average ranking created - Figure: %s, Average: %.2f",
-					avg.Name, avg.Average)
-			}
-		} else {
-			// Update existing average ranking
-			existing.Average = avg.Average
-			existing.UpdatedAt = time.Now()
-			if err := db.Save(&existing).Error; err != nil {
-				log.Printf("Error updating average ranking: %v", err)
-			} else {
-				log.Printf("Average ranking updated - Figure: %s, New Average: %.2f",
-					avg.Name, avg.Average)
+				log.Printf("Default average ranking created - Figure: %s, Average: %.2f",
+					figure.Name, float64(figure.Rank))
 			}
 		}
 	}

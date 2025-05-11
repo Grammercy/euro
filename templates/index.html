@@ -9,6 +9,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 </head>
 <body class="bg-gray-100">
+    <!-- Animated background -->
+    <div class="animated-background"></div>
+    
+    <!-- Scroll progress indicator -->
+    <div class="scroll-progress"></div>
+
     <header class="bg-blue-900 text-white py-12">
         <div class="container mx-auto px-4">
             <h1 class="text-4xl md:text-5xl font-bold text-center mb-4">Top 10 AP European History Innovators</h1>
@@ -18,13 +24,30 @@
 
     <main class="container mx-auto px-4 py-8">
         <!-- Timeline Section -->
-        <section class="mb-16">
+        <section class="mb-16 section">
             <h2 class="text-3xl font-bold text-center mb-8">Historical Timeline</h2>
             <div class="timeline-container"></div>
         </section>
 
+        <!-- Ranking Section -->
+        <section id="ranking-section" class="mb-16 section">
+            <h2 class="text-3xl font-bold text-center mb-8">Rank the Innovators</h2>
+            <p class="text-center text-gray-600 mb-8">Drag and drop the cards to rank these historical figures based on their impact and innovation.</p>
+            
+            <div id="ranking-container" class="mb-8"></div>
+            
+            <div class="flex justify-center space-x-4">
+                <button id="submit-ranking" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Submit Rankings
+                </button>
+                <button id="show-averages" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    Show Average Rankings
+                </button>
+            </div>
+        </section>
+
         <!-- My Rankings Section -->
-        <section id="my-rankings" class="section">
+        <section id="my-rankings" class="section mb-16">
             <div class="container">
                 <h2 class="section-title">My Historical Rankings</h2>
                 <p class="section-description">A personal analysis of these innovators' impact on European history, with detailed historical context and reasoning.</p>
@@ -132,23 +155,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Ranking Section -->
-        <section id="ranking-section" class="mb-16">
-            <h2 class="text-3xl font-bold text-center mb-8">Rank the Innovators</h2>
-            <p class="text-center text-gray-600 mb-8">Drag and drop the cards to rank these historical figures based on their impact and innovation.</p>
-            
-            <div id="ranking-container" class="mb-8"></div>
-            
-            <div class="flex justify-center space-x-4">
-                <button id="submit-ranking" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    Submit Rankings
-                </button>
-                <button id="show-averages" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                    Show Average Rankings
-                </button>
-            </div>
-        </section>
     </main>
 
     <!-- Modal for detailed view -->
@@ -186,5 +192,48 @@
     </div>
 
     <script src="/static/js/main.js"></script>
+    <script>
+        console.log('Initializing animations...');
+        
+        // Intersection Observer for section animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                console.log('Section intersection:', entry.target.id || 'unnamed section', entry.isIntersecting);
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        // Observe all sections
+        const sections = document.querySelectorAll('.section');
+        console.log('Found sections:', sections.length);
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // Scroll progress indicator
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            const progressBar = document.querySelector('.scroll-progress');
+            if (progressBar) {
+                progressBar.style.transform = `scaleX(${scrolled / 100})`;
+            }
+        });
+
+        // Force initial animation check
+        setTimeout(() => {
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    section.classList.add('visible');
+                }
+            });
+        }, 100);
+    </script>
 </body>
 </html> 
