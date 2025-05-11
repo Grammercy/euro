@@ -122,7 +122,7 @@ func main() {
 
 	// Start server
 	fmt.Println("Starting server on port 8090")
-	r.Run(":8090")
+	r.Run(":8080")
 }
 
 func updateAverageRankings(db *gorm.DB) {
