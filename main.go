@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -122,7 +123,26 @@ func main() {
 
 	// Start server
 	fmt.Println("Starting server on port 8090")
-	r.Run(":8080")
+
+	// Check if SSL certificates exist
+	certFile := "cert.pem"
+	keyFile := "key.pem"
+
+	if _, err := os.Stat(certFile); err == nil {
+		if _, err := os.Stat(keyFile); err == nil {
+			// Both certificate files exist, start HTTPS server
+			fmt.Println("Starting HTTPS server on port 443")
+			if err := r.RunTLS(":443", certFile, keyFile); err != nil {
+				log.Fatal("Failed to start HTTPS server:", err)
+			}
+		}
+	} else {
+		// No SSL certificates, start HTTP server
+		fmt.Println("Starting HTTP server on port 8080")
+		if err := r.Run(":8080"); err != nil {
+			log.Fatal("Failed to start HTTP server:", err)
+		}
+	}
 }
 
 func updateAverageRankings(db *gorm.DB) {
