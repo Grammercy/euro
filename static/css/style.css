@@ -121,10 +121,36 @@
 .figure-card {
     transition: transform 0.3s ease;
     cursor: pointer;
+    position: relative;
 }
 
 .figure-card:hover {
     transform: translateY(-5px);
+}
+
+.rank-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.figure-card:hover .rank-badge {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Modal styles */
@@ -228,13 +254,27 @@
 
 /* My Rankings Section */
 #my-rankings {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+#my-rankings::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    opacity: 0.8;
 }
 
 .rankings-list {
     max-width: 900px;
     margin: 40px auto;
+    position: relative;
 }
 
 .ranking-item {
@@ -244,13 +284,34 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s forwards;
 }
 
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ranking-item:nth-child(1) { animation-delay: 0.1s; }
+.ranking-item:nth-child(2) { animation-delay: 0.2s; }
+.ranking-item:nth-child(3) { animation-delay: 0.3s; }
+.ranking-item:nth-child(4) { animation-delay: 0.4s; }
+.ranking-item:nth-child(5) { animation-delay: 0.5s; }
+.ranking-item:nth-child(6) { animation-delay: 0.6s; }
+.ranking-item:nth-child(7) { animation-delay: 0.7s; }
+.ranking-item:nth-child(8) { animation-delay: 0.8s; }
+.ranking-item:nth-child(9) { animation-delay: 0.9s; }
+.ranking-item:nth-child(10) { animation-delay: 1s; }
+
 .ranking-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .ranking-number {
@@ -264,17 +325,54 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ranking-number::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ranking-item:hover .ranking-number::after {
+    opacity: 1;
 }
 
 .ranking-content {
     padding: 20px 30px;
     flex-grow: 1;
+    position: relative;
 }
 
 .ranking-content h3 {
     color: #2c3e50;
     margin: 0 0 10px 0;
     font-size: 1.5em;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+}
+
+.ranking-content h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    transition: width 0.3s ease;
+}
+
+.ranking-item:hover .ranking-content h3::after {
+    width: 100%;
 }
 
 .ranking-justification {

@@ -30,8 +30,9 @@ async function loadFigures() {
 
 function createFigureCard(figure) {
     const card = document.createElement('div');
-    card.className = 'figure-card bg-white rounded-lg shadow-lg overflow-hidden';
+    card.className = 'figure-card bg-white rounded-lg shadow-lg overflow-hidden relative';
     card.innerHTML = `
+        <div class="rank-badge">${figure.rank || '?'}</div>
         <img src="${figure.imageUrl}" alt="${figure.name}" class="w-full h-48 object-cover">
         <div class="p-4">
             <h3 class="text-xl font-bold">${figure.name}</h3>
@@ -94,14 +95,28 @@ function setupRankingSystem() {
     const averagesModal = document.getElementById('averages-modal');
     const closeAveragesBtn = document.querySelector('.close-averages');
 
+    // Function to update rank badges
+    function updateRankBadges() {
+        const cards = rankingContainer.children;
+        for (let i = 0; i < cards.length; i++) {
+            const badge = cards[i].querySelector('.rank-badge');
+            if (badge) {
+                badge.textContent = (i + 1).toString();
+            }
+        }
+    }
+
     // Initialize Sortable
     new Sortable(rankingContainer, {
         animation: 150,
         ghostClass: 'bg-blue-50',
         onEnd: function(evt) {
-            // Update visual ranking indicators if needed
+            updateRankBadges();
         }
     });
+
+    // Initial rank badge update
+    updateRankBadges();
 
     // Submit rankings
     submitButton.addEventListener('click', async () => {
